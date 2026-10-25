@@ -1,25 +1,55 @@
-create extension if not exists pgcrypto;
-create table if not exists public.users (
- id uuid primary key default gen_random_uuid(), email text not null unique,
- password_hash text not null, created_at timestamptz not null default now()
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+CREATE TABLE IF NOT EXISTS public.users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-create table if not exists public.refresh_tokens (
- id uuid primary key default gen_random_uuid(), user_id uuid not null references public.users(id) on delete cascade,
- token_hash text not null, jti text not null unique, expires_at timestamptz not null, revoked_at timestamptz,
- created_at timestamptz not null default now()
+
+CREATE TABLE IF NOT EXISTS public.refresh_tokens (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES public.users (id) ON DELETE CASCADE,
+    token_hash TEXT NOT NULL,
+    jti TEXT NOT NULL UNIQUE,
+    expires_at TIMESTAMPTZ NOT NULL,
+    revoked_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-create index if not exists refresh_tokens_user_idx on public.refresh_tokens(user_id);
-create table if not exists public.urls (
- id uuid primary key default gen_random_uuid(), code varchar(32) not null unique,
- original_url text not null, owner_id uuid not null references public.users(id) on delete cascade,
- expires_at timestamptz, password_hash text, total_clicks bigint not null default 0,
- created_at timestamptz not null default now(), updated_at timestamptz not null default now()
+
+CREATE INDEX IF NOT EXISTS refresh_tokens_user_idx
+    ON public.refresh_tokens (user_id);
+
+CREATE TABLE IF NOT EXISTS public.urls (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    code VARCHAR(32) NOT NULL UNIQUE,
+    original_url TEXT NOT NULL,
+    owner_id UUID NOT NULL REFERENCES public.users (id) ON DELETE CASCADE,
+    expires_at TIMESTAMPTZ,
+    password_hash TEXT,
+    total_clicks BIGINT NOT NULL DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-create index if not exists urls_owner_created_idx on public.urls(owner_id,created_at desc);
-create table if not exists public.clicks (
- id bigint generated always as identity primary key, url_id uuid not null references public.urls(id) on delete cascade,
- timestamp timestamptz not null default now(), country text, device text, browser text, os text, referrer text, ip_hash text
+
+CREATE INDEX IF NOT EXISTS urls_owner_created_idx
+    ON public.urls (owner_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS public.clicks (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    url_id UUID NOT NULL REFERENCES public.urls (id) ON DELETE CASCADE,
+    timestamp TIMESTAMPTZ NOT NULL DEFAULT now(),
+    country TEXT,
+    device TEXT,
+    browser TEXT,
+    os TEXT,
+    referrer TEXT,
+    ip_hash TEXT
 );
-create index if not exists clicks_url_timestamp_idx on public.clicks(url_id,timestamp desc);
-create index if not exists clicks_timestamp_idx on public.clicks(timestamp desc);
+
+CREATE INDEX IF NOT EXISTS clicks_url_timestamp_idx
+    ON public.clicks (url_id, timestamp DESC);
+CREATE INDEX IF NOT EXISTS clicks_timestamp_idx
+    ON public.clicks (timestamp DESC);
+
 -- API uses the Supabase service-role key only on the server. Do not ship it to clients.

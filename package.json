@@ -1,5 +1,15 @@
 {
   "name": "url-shortener-platform",
   "private": true,
-  "scripts": {"dev:api":"npm --prefix backend run dev", "dev:client":"npm --prefix frontend run dev", "install:all":"npm install --prefix backend && npm install --prefix frontend", "test":"npm --prefix backend test"}
+  "scripts": {
+    "dev:api": "npm --prefix backend run dev",
+    "dev:client": "npm --prefix frontend run dev",
+    "install:all": "npm install --prefix backend && npm install --prefix frontend",
+    "test": "npm --prefix backend test",
+    "format": "prettier --write README.md package.json backend/package.json backend/jest.config.js \"backend/src/**/*.js\" \"backend/tests/**/*.js\" frontend/package.json frontend/vite.config.js frontend/index.html \"frontend/src/**/*.{js,jsx,css}\"",
+    "format:check": "prettier --check README.md package.json backend/package.json backend/jest.config.js \"backend/src/**/*.js\" \"backend/tests/**/*.js\" frontend/package.json frontend/vite.config.js frontend/index.html \"frontend/src/**/*.{js,jsx,css}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2"
+  }
 }
