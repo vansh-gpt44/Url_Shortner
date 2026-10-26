@@ -52,4 +52,3 @@ CREATE INDEX IF NOT EXISTS clicks_url_timestamp_idx
 CREATE INDEX IF NOT EXISTS clicks_timestamp_idx
     ON public.clicks (timestamp DESC);
 
--- API uses the Supabase service-role key only on the server. Do not ship it to clients.
